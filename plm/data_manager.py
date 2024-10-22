@@ -70,6 +70,8 @@ class DataManager:
                     project["learning_goals"].append(goal)
                 elif isinstance(goal, list):
                     project["learning_goals"].extend(goal)
+                else:
+                    project["learning_goals"].append(str(goal))
                 self._save_data()
                 return True
         return False
