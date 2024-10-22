@@ -64,7 +64,7 @@ class DataManager:
     def set_learning_goal(self, project_name, goal):
         for project in self.data["projects"]:
             if project["name"] == project_name:
-                if "learning_goals" not in project:
+                if "learning_goals" not in project or not isinstance(project["learning_goals"], list):
                     project["learning_goals"] = []
                 if isinstance(goal, str):
                     project["learning_goals"].append(goal)
