@@ -6,3 +6,7 @@ numpy>=1.21.4
 scikit-learn>=1.0.1
 transformers>=4.12.5
 torch>=1.10.0
+click
+prompt_toolkit
+pydub
+rich
