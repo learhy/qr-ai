@@ -9,7 +9,7 @@ from ae.ae import AnalysisEngine
 from reporting_engine.engine import ReportingEngine
 
 def setup_logging(debug=False):
-    level = logging.DEBUG if debug else logging.INFO
+    level = logging.DEBUG if debug else logging.WARNING
     logging.basicConfig(level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     return logging.getLogger(__name__)
 
