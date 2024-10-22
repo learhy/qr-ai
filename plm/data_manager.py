@@ -66,7 +66,10 @@ class DataManager:
             if project["name"] == project_name:
                 if "learning_goals" not in project:
                     project["learning_goals"] = []
-                project["learning_goals"].append(goal)
+                if isinstance(goal, str):
+                    project["learning_goals"].append(goal)
+                elif isinstance(goal, list):
+                    project["learning_goals"].extend(goal)
                 self._save_data()
                 return True
         return False

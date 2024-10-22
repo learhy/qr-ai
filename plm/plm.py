@@ -77,7 +77,8 @@ class ProjectLifecycleManager:
         return project_config.get('Project', 'principal_investigator', fallback=self.global_config.get('Project', 'default_principal_investigator'))
 
     def set_learning_goal(self, project_name, goal):
-        if self.data_manager.set_learning_goal(project_name, goal):
+        goal_lines = goal.split('\n')
+        if self.data_manager.set_learning_goal(project_name, goal_lines):
             print(f"Learning goal set for project '{project_name}'.")
             print("Note: Markdown formatting is supported for learning goals.")
         else:
