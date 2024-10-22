@@ -7,6 +7,10 @@ from plm.plm import ProjectLifecycleManager
 from ppe.ppe import PreprocessorEngine
 from ae.ae import AnalysisEngine
 from reporting_engine.engine import ReportingEngine
+from ppe.ppe import PreprocessorEngine
+from rich.console import Console
+from rich.table import Table
+from rich.markdown import Markdown
 
 def setup_logging(debug=False):
     level = logging.DEBUG if debug else logging.WARNING
@@ -30,7 +34,7 @@ def main():
         
         plm = ProjectLifecycleManager(data_file_path)
         ppe = PreprocessorEngine()
-        ae = AnalysisEngine()
+        ae = AnalysisEngine(plm)
         re = ReportingEngine()
 
         logger.info("Checking for existing project")

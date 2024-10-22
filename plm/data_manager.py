@@ -1,6 +1,7 @@
 import json
 import os
 import configparser
+import urllib.parse
 
 class DataManager:
     def __init__(self, file_path):
@@ -61,36 +62,63 @@ class DataManager:
                 return True
         return False
 
-    def set_learning_goal(self, project_name, goal):
+    def set_learning_goal(self, project_name, raw_goal, preprocessed_goals):
         for project in self.data["projects"]:
             if project["name"] == project_name:
-                if "learning_goals" not in project or not isinstance(project["learning_goals"], list):
-                    project["learning_goals"] = []
-                if isinstance(goal, str):
-                    project["learning_goals"].append(goal)
-                elif isinstance(goal, list):
-                    project["learning_goals"].extend(goal)
-                else:
-                    project["learning_goals"].append(str(goal))
+                project["learning_goals"] = {
+                    "raw": raw_goal,
+                    "preprocessed": preprocessed_goals
+                }
                 self._save_data()
                 return True
         return False
 
-    def set_interview(self, project_name, interview_name, interviewee, interviewer, date, description):
+    def get_learning_goals(self, project_name):
         for project in self.data["projects"]:
             if project["name"] == project_name:
+                return project.get("learning_goals", {})
+        return {}
+
+    def create_interview(self, project_name, interview_data):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                interviews = project.setdefault("interviews", [])
+                new_index = max([interview.get("index", 0) for interview in interviews] + [0]) + 1
                 new_interview = {
-                    "name": interview_name,
-                    "interviewee": interviewee,
-                    "interviewer": interviewer,
-                    "date": date,
-                    "description": description,
-                    "files": []
+                    "index": new_index,
+                    "name": interview_data.get("name", f"Interview {new_index}"),
+                    "interviewee": interview_data.get("interviewee", "Not set"),
+                    "interviewer": interview_data.get("interviewer", "Not set"),
+                    "date": interview_data.get("date", "Not set"),
+                    "description": interview_data.get("description", ""),
+                    "original_audio_file": interview_data.get("original_audio_file"),
+                    "wav_file": interview_data.get("wav_file"),
+                    "vtt_file": interview_data.get("vtt_file"),
+                    "other_speakers": interview_data.get("other_speakers", []),
+                    "files": interview_data.get("files", [])
                 }
-                project["interviews"].append(new_interview)
+                interviews.append(new_interview)
                 self._save_data()
-                return True
-        return False
+                return new_interview
+        return None
+
+    def update_interview(self, project_name, interview_name, interview_data):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                for interview in project.get("interviews", []):
+                    if interview["name"] == interview_name:
+                        interview.update(interview_data)
+                        self._save_data()
+                        return interview
+        return None
+
+    def get_interview(self, project_name, interview_name):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                for interview in project.get("interviews", []):
+                    if interview["name"] == interview_name:
+                        return interview
+        return None
 
     def import_file(self, project_name, filename, file_type, interview_name=None):
         for project in self.data["projects"]:
@@ -134,7 +162,6 @@ class DataManager:
                         if file_type not in interview:
                             interview[file_type] = 'Not set'
                         interview[f'{file_type}_processed'] = interview.get(f'{file_type}_processed', False)
-                        interview[f'{file_type}_analyzed'] = interview.get(f'{file_type}_analyzed', False)
                 return project
         return None
 
@@ -148,9 +175,9 @@ class DataManager:
                     project["interviews"] = []
                 project["interviews"].append({
                     "name": interview_name,
-                    "original_audio_file": original_audio_filename,
-                    "wav_file": wav_filename,
-                    "vtt_file": vtt_filename,
+                    "original_audio_file": urllib.parse.unquote(original_audio_filename),
+                    "wav_file": urllib.parse.unquote(wav_filename),
+                    "vtt_file": urllib.parse.unquote(vtt_filename),
                     "interviewee": speakers["interviewee"],
                     "interviewer": speakers["interviewer"],
                     "other_speakers": speakers["other_speakers"]
@@ -207,3 +234,28 @@ class DataManager:
                         imported_files.add(os.path.splitext(interview["vtt_file"])[0])
                 return imported_files
         return set()
+
+    def get_learning_goals(self, project_name):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                return project.get("learning_goals", {})
+        return {}
+
+    def get_interview_data(self, project_name, interview_index=None):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                if interview_index is None or interview_index == 'all':
+                    return project.get("interviews", [])
+                else:
+                    return [interview for interview in project.get("interviews", []) if interview["index"] == int(interview_index)]
+        return []
+
+    def save_analysis_results(self, project_name, interview_index, analysis_results):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                for interview in project["interviews"]:
+                    if interview["index"] == interview_index:
+                        interview["analysis_results"] = analysis_results
+                        self._save_data()
+                        return True
+        return False

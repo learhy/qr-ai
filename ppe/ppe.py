@@ -1,9 +1,54 @@
 import re
-from collections import Counter
+from typing import List
+from dataclasses import dataclass
+
+@dataclass
+class LearningGoal:
+    content: str
+    index: int
 
 class PreprocessorEngine:
     def __init__(self):
-        pass
+        self.learning_goals = []
+
+    def get_preprocessed_learning_goals(self, learning_goals: str) -> List[LearningGoal]:
+        # Split the input text into lines first
+        lines = learning_goals.split('\n')
+        
+        preprocessed_goals = []
+        index = 1
+        
+        for line in lines:
+            # Split each line into sentences
+            sentences = re.split(r'(?<=[.!?])\s+', line)
+            
+            for sentence in sentences:
+                cleaned_sentence = self._clean_content(sentence)
+                if cleaned_sentence:
+                    preprocessed_goals.append(LearningGoal(content=cleaned_sentence, index=index))
+                    index += 1
+        
+        return preprocessed_goals
+
+    def _clean_content(self, content: str) -> str:
+        # Remove markdown-style formatting and extra whitespace
+        content = re.sub(r'\*\*(.*?)\*\*', r'\1', content)  # Remove bold
+        content = re.sub(r'\*(.*?)\*', r'\1', content)  # Remove italic
+        # Remove leading numbers and dots (e.g., "1.", "1.1.", etc.)
+        content = re.sub(r'^\s*(?:\d+\.)+\s*', '', content)
+        return content.strip()
+
+    def set_learning_goals(self, learning_goals: str):
+        self.learning_goals = self.get_preprocessed_learning_goals(learning_goals)
+
+    def get_learning_goals(self) -> List[LearningGoal]:
+        return self.learning_goals
+
+    def get_flattened_learning_goals(self) -> List[str]:
+        return [f"{goal.index}. {goal.content}" for goal in self.learning_goals]
+
+    def get_learning_goals_dict(self) -> List[dict]:
+        return [{'index': goal.index, 'content': goal.content} for goal in self.learning_goals]
 
     def discover_entities(self, text):
         # Stub: Perform automated entity discovery
@@ -33,6 +78,7 @@ class PreprocessorEngine:
                 speakers.append(match.group(1).strip())
         
         # Count occurrences of each speaker
+        from collections import Counter
         speaker_counts = Counter(speakers)
         
         # Sort speakers by count, descending
