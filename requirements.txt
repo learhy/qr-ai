@@ -9,4 +9,4 @@ torch>=1.10.0
 click
 prompt_toolkit
 pydub
-rich
+rich>=10.0.0

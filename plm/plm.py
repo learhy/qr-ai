@@ -7,6 +7,7 @@ from pydub import AudioSegment
 import glob
 from rich.console import Console
 from rich.table import Table
+from rich.markdown import Markdown
 
 class ProjectLifecycleManager:
     def __init__(self, file_path):
@@ -78,6 +79,7 @@ class ProjectLifecycleManager:
     def set_learning_goal(self, project_name, goal):
         if self.data_manager.set_learning_goal(project_name, goal):
             print(f"Learning goal set for project '{project_name}'.")
+            print("Note: Markdown formatting is supported for learning goals.")
         else:
             print(f"Project '{project_name}' does not exist.")
 
@@ -236,7 +238,13 @@ class ProjectLifecycleManager:
             
             console.print(f"[bold]Project Name:[/bold] {project['name']}")
             console.print(f"[bold]Principal Investigator:[/bold] {self.get_project_pi(project_name)}")
-            console.print(f"[bold]Learning Goals:[/bold] {project.get('learning_goals', 'No learning goals set')}")
+            console.print("[bold]Learning Goals:[/bold]")
+            learning_goals = project.get('learning_goals', [])
+            if learning_goals:
+                for goal in learning_goals:
+                    console.print(Markdown(goal))
+            else:
+                console.print("No learning goals set")
             
             for interview in project.get('interviews', []):
                 console.print(f"\n[bold]{interview.get('name', 'Unnamed Interview')}[/bold]")

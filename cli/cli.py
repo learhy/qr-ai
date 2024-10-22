@@ -22,7 +22,15 @@ def interactive_cli(plm, ppe, ae, re, project_name, project_config):
         elif command == 'help':
             click.echo("Available commands: " + ", ".join(commands))
         elif command == 'set_learning_goal':
-            goal = session.prompt("Enter learning goal: ")
+            print("Enter learning goal (Markdown supported). Press Ctrl+D (Unix) or Ctrl+Z (Windows) followed by Enter to finish:")
+            goal_lines = []
+            while True:
+                try:
+                    line = input()
+                    goal_lines.append(line)
+                except EOFError:
+                    break
+            goal = "\n".join(goal_lines)
             plm.set_learning_goal(project_name, goal)
         elif command == 'import':
             plm.import_files(project_name)
