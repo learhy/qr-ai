@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project_name }} - Research Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .metadata {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .interview {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .learning-goal {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .evidence {
+            margin-left: 20px;
+            border-left: 2px solid #6c757d;
+            padding-left: 10px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ project_name }} - Research Report</h1>
+    
+    <div class="metadata">
+        <p><strong>Principal Investigator:</strong> {{ principal_investigator }}</p>
+        <p><strong>Interviewers:</strong> {{ interviewers|join(', ') }}</p>
+        <p><strong>Number of Interviews:</strong> {{ interviews|length }}</p>
+    </div>
+
+    <h2>Interviews and Analysis</h2>
+    {% for interview in interviews %}
+        <div class="interview">
+            <h3>Interview with {{ interview.interviewee }}</h3>
+            <p><strong>Date:</strong> {{ interview.date }}</p>
+            <p><strong>Interviewer:</strong> {{ interview.interviewer }}</p>
+            
+            {% if interview.analysis_results %}
+                <h4>Analysis Results</h4>
+                {% for result in interview.analysis_results %}
+                    <div class="learning-goal">
+                        <h5>{{ result.learning_goal }}</h5>
+                        <p><strong>Answer:</strong> {{ result.answer }}</p>
+                        <p><strong>Confidence:</strong> {{ result.confidence }}</p>
+                        {% if result.evidence %}
+                            <div class="evidence">
+                                <p><strong>Evidence:</strong></p>
+                                <ul>
+                                {% for evidence in result.evidence %}
+                                    <li>
+                                        <p><strong>Timestamp:</strong> {{ evidence.timestamp }}</p>
+                                        <p><strong>Quote:</strong> "{{ evidence.quote }}"</p>
+                                        <p><strong>Explanation:</strong> {{ evidence.explanation }}</p>
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No analysis results available for this interview.</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <footer>
+        <p>Report generated on {{ generated_date }}</p>
+    </footer>
+</body>
+</html>

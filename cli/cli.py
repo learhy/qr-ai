@@ -1,8 +1,12 @@
 import click
+import webbrowser
+import os
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
+from reporting_engine.engine import ReportingEngine
 
-def interactive_cli(plm, ppe, ae, re, project_name, project_config):
+def interactive_cli(plm, ppe, ae, project_name, project_config):
+    re = ReportingEngine()
     click.echo(f"Welcome to QR-AI Interactive CLI! Current project: {project_name}")
     
     commands = ['set_learning_goal', 'show_learning_goals', 'import', 'set_interview', 'associate_file', 'status', 'analyze', 'report', 'help', 'exit']
@@ -75,8 +79,13 @@ def interactive_cli(plm, ppe, ae, re, project_name, project_config):
             
             ae.analyze_interviews(project_name, argument)
         elif command == 'report':
-            report = re.generate_webpage(project_name)
-            click.echo(f"Generated report: {report}")
+            try:
+                output_file = re.generate_webpage(project_name)
+                click.echo(f"Generated report: {output_file}")
+                webbrowser.open('file://' + os.path.abspath(output_file))
+                click.echo("The report has been opened in your default web browser.")
+            except Exception as e:
+                click.echo(f"An error occurred while generating the report: {str(e)}")
         elif command == 'show_learning_goals':
             plm.show_preprocessed_learning_goals(project_name)
         else:

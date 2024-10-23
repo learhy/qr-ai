@@ -58,7 +58,7 @@ def main():
             print(f"Principal Investigator: {project_pi}")
             
             logger.info("Starting interactive CLI")
-            interactive_cli(plm, ppe, ae, re, project_name, project_config)
+            interactive_cli(plm, ppe, ae, project_name, project_config)
         else:
             logger.warning("No project selected or created. Exiting QR-AI.")
             print("Exiting QR-AI. No project selected or created.")
