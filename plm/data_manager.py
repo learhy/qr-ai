@@ -255,7 +255,7 @@ class DataManager:
             if project["name"] == project_name:
                 for interview in project["interviews"]:
                     if interview["index"] == interview_index:
-                        interview["analysis_results"] = analysis_results
+                        interview["analysis_results"] = json.loads(json.dumps(analysis_results))
                         self._save_data()
                         return True
         return False
