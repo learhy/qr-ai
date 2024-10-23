@@ -34,7 +34,7 @@ def main():
         
         plm = ProjectLifecycleManager(data_file_path)
         ppe = PreprocessorEngine()
-        ae = AnalysisEngine(plm)
+        ae = AnalysisEngine(plm.data_manager, plm.anthropic_api_key, plm.anthropic_max_tokens)
         re = ReportingEngine()
 
         logger.info("Checking for existing project")

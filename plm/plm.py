@@ -2,6 +2,7 @@ import os
 import configparser
 from .data_manager import DataManager
 from ppe.ppe import PreprocessorEngine
+from ae.ae import AnalysisEngine
 import shutil
 from pydub import AudioSegment
 import glob
@@ -29,6 +30,9 @@ class ProjectLifecycleManager:
         self.anthropic_model = self.global_config.get('Anthropic', 'model', fallback='claude-3-5-sonnet-20241022')
         self.anthropic_max_tokens = self.global_config.getint('Anthropic', 'max_tokens', fallback=4000)
         self.anthropic_temperature = self.global_config.getfloat('Anthropic', 'temperature', fallback=0.7)
+
+        # Initialize AnalysisEngine
+        self.ae = AnalysisEngine(self.data_manager, self.anthropic_api_key, self.anthropic_max_tokens)
 
     def _get_project_config(self, project_dir):
         config = configparser.ConfigParser()
@@ -283,6 +287,24 @@ class ProjectLifecycleManager:
         else:
             print(f"Failed to associate file. Project, interview, or file not found.")
 
+    def preprocess_and_save_interview(self, project_name, interview):
+        vtt_filename = interview.get('vtt_file')
+        if vtt_filename:
+            raw_content = self.get_vtt_content(project_name, vtt_filename)
+            if raw_content:
+                processed_content = self.ppe.preprocess_vtt_content(raw_content)
+                raw_tokens = self.ae._estimate_token_count(raw_content)
+                processed_tokens = self.ae._estimate_token_count(processed_content)
+                
+                # Save processed content and token counts
+                self.data_manager.update_interview(project_name, interview['name'], {
+                    'processed_vtt_content': processed_content,
+                    'raw_tokens': raw_tokens,
+                    'processed_tokens': processed_tokens
+                })
+                return raw_tokens, processed_tokens
+        return 0, 0
+
     def status(self, project_name):
         project = self.data_manager.get_project_status(project_name)
         if project:
@@ -304,8 +326,16 @@ class ProjectLifecycleManager:
                 interviews_table.add_column("Interviewer")
                 interviews_table.add_column("Other Participants")
                 interviews_table.add_column("Analyzed", justify="center")
+                interviews_table.add_column("Raw Tokens", justify="right")
+                interviews_table.add_column("Processed Tokens", justify="right")
 
                 for interview in project['interviews']:
+                    if 'raw_tokens' not in interview or 'processed_tokens' not in interview:
+                        raw_tokens, processed_tokens = self.preprocess_and_save_interview(project_name, interview)
+                    else:
+                        raw_tokens = interview['raw_tokens']
+                        processed_tokens = interview['processed_tokens']
+
                     interviews_table.add_row(
                         str(interview['index']),
                         interview.get('name', 'Unnamed Interview'),
@@ -313,7 +343,9 @@ class ProjectLifecycleManager:
                         interview.get('interviewee', 'Not set'),
                         interview.get('interviewer', 'Not set'),
                         ', '.join(interview.get('other_speakers', [])) or 'None',
-                        '✓' if interview.get('analysis_results') else ' '
+                        '✓' if interview.get('analysis_results') else ' ',
+                        str(raw_tokens),
+                        str(processed_tokens)
                     )
 
                 console.print(interviews_table)
@@ -389,6 +421,14 @@ class ProjectLifecycleManager:
         except Exception as e:
             logging.error(f"Error reading VTT file {vtt_path}: {str(e)}")
             return None
+
+    def perform_meta_analysis(self, project_name):
+        from ae.ae import AnalysisEngine
+        analysis_engine = AnalysisEngine(self.data_manager, self.anthropic_api_key, self.anthropic_max_tokens)
+        return analysis_engine.perform_meta_analysis(project_name)
+
+    def get_meta_analysis_results(self, project_name):
+        return self.data_manager.get_meta_analysis_results(project_name)
 
     def table_status(self, project_name):
         project = self.data_manager.get_project_status(project_name)

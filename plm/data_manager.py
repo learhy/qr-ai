@@ -259,3 +259,17 @@ class DataManager:
                         self._save_data()
                         return True
         return False
+
+    def save_meta_analysis_results(self, project_name, meta_analysis_results):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                project['meta_analysis'] = meta_analysis_results
+                self._save_data()
+                return True
+        return False
+
+    def get_meta_analysis_results(self, project_name):
+        for project in self.data["projects"]:
+            if project["name"] == project_name:
+                return project.get('meta_analysis', None)
+        return None

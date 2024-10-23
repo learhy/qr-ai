@@ -92,3 +92,41 @@ class PreprocessorEngine:
         }
         
         return result
+
+    def preprocess_vtt_content(self, vtt_content: str) -> str:
+        lines = vtt_content.split('\n')
+        processed_lines = []
+        current_speaker = None
+
+        # Remove the "WEBVTT" header if present
+        if lines and lines[0].strip() == "WEBVTT":
+            lines = lines[1:]
+
+        for line in lines:
+            # Remove timestamp lines
+            if re.match(r'\d{2}:\d{2}:\d{2}\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}', line):
+                continue
+            
+            # Remove leading numbers and spaces
+            line = re.sub(r'^\s*\d+\s*', '', line)
+            
+            # Process speaker labels and utterances
+            if ':' in line:
+                speaker, utterance = line.split(':', 1)
+                if speaker != current_speaker:
+                    if processed_lines:
+                        processed_lines.append('')  # Add blank line between speakers
+                    current_speaker = speaker
+                    processed_lines.append(f"{speaker}:{utterance.strip()}")
+                else:
+                    processed_lines[-1] += f" {utterance.strip()}"
+            elif line.strip():
+                processed_lines[-1] += f" {line.strip()}"
+
+        # Join processed lines
+        processed_content = "\n".join(processed_lines)
+
+        # Remove redundant spaces
+        processed_content = re.sub(r'\s+', ' ', processed_content)
+
+        return processed_content

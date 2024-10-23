@@ -23,7 +23,8 @@ class ReportingEngine:
             'interviewers': self._get_unique_interviewers(project_data),
             'interviews': project_data.get('interviews', []),
             'learning_goals': project_data.get('learning_goals', {}).get('preprocessed', []),
-            'generated_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            'generated_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'meta_analysis': self.data_manager.get_meta_analysis_results(project_name)
         }
 
         # Render the template

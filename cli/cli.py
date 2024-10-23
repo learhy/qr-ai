@@ -9,7 +9,7 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
     re = ReportingEngine()
     click.echo(f"Welcome to QR-AI Interactive CLI! Current project: {project_name}")
     
-    commands = ['set_learning_goal', 'show_learning_goals', 'import', 'set_interview', 'associate_file', 'status', 'analyze', 'report', 'help', 'exit']
+    commands = ['set_learning_goal', 'show_learning_goals', 'import', 'set_interview', 'associate_file', 'status', 'analyze', 'meta_analyze', 'report', 'help', 'exit']
     command_completer = WordCompleter(commands, ignore_case=True)
     session = PromptSession(completer=command_completer)
 
@@ -88,6 +88,20 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
                 click.echo(f"An error occurred while generating the report: {str(e)}")
         elif command == 'show_learning_goals':
             plm.show_preprocessed_learning_goals(project_name)
+        elif command == 'meta_analyze':
+            try:
+                results = plm.perform_meta_analysis(project_name)
+                click.echo("Meta-analysis completed successfully.")
+                click.echo("Results summary:")
+                for result in results:
+                    click.echo(f"Learning Goal: {result['learning_goal']}")
+                    click.echo(f"Answer: {result['answer'][:100]}...")  # Show first 100 characters
+                    click.echo(f"Confidence: {result['confidence']}")
+                    click.echo("---")
+            except ValueError as e:
+                click.echo(f"Error during meta-analysis: {str(e)}")
+            except Exception as e:
+                click.echo(f"An unexpected error occurred during meta-analysis: {str(e)}")
         else:
             click.echo("Unknown command. Type 'help' for available commands.")
 
