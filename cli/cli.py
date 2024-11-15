@@ -108,7 +108,7 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
         elif command == 'discover_entities':
             try:
                 transcript_index = int(session.prompt("Enter the index number of the transcript file: "))
-                transcript_data = plm.get_interview_data(project_name, transcript_index)
+                transcript_data = plm.get_interview_data(project_name, interview_index=transcript_index)
                 if not transcript_data:
                     click.echo("No transcript found at the specified index.")
                     continue
@@ -118,6 +118,8 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
                     click.echo(entity)
             except ValueError:
                 click.echo("Invalid index number. Please enter a valid integer.")
+            except Exception as e:
+                click.echo(f"An error occurred: {str(e)}")
         else:
             click.echo("Unknown command. Type 'help' for available commands.")
 
