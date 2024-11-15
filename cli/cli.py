@@ -4,6 +4,7 @@ import os
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
 from reporting_engine.engine import ReportingEngine
+from ppe.ppe import PreprocessorEngine
 
 def interactive_cli(plm, ppe, ae, project_name, project_config):
     re = ReportingEngine()
@@ -104,6 +105,13 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
                 click.echo(f"Error during meta-analysis: {str(e)}")
             except Exception as e:
                 click.echo(f"An unexpected error occurred during meta-analysis: {str(e)}")
+        elif command == 'discover_entities':
+            ppe = PreprocessorEngine()
+            text = session.prompt("Enter the text to discover entities: ")
+            entities = ppe.discover_entities(text)
+            click.echo("Discovered entities:")
+            for entity in entities:
+                click.echo(entity)
         else:
             click.echo("Unknown command. Type 'help' for available commands.")
 
