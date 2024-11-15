@@ -118,6 +118,8 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
                     click.echo(entity)
             except ValueError as ve:
                 click.echo(f"Invalid index number: {str(ve)}")
+            except IndexError as ie:
+                click.echo(f"Index out of range: {str(ie)}")
             except Exception as e:
                 click.echo(f"An error occurred: {str(e)}")
         else:
