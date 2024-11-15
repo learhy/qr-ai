@@ -10,7 +10,7 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
     re = ReportingEngine()
     click.echo(f"Welcome to QR-AI Interactive CLI! Current project: {project_name}")
     
-    commands = ['set_learning_goal', 'show_learning_goals', 'import', 'set_interview', 'associate_file', 'status', 'analyze', 'meta_analyze', 'report', 'help', 'exit']
+    commands = ['set_learning_goal', 'show_learning_goals', 'import', 'set_interview', 'associate_file', 'status', 'analyze', 'meta_analyze', 'report', 'help', 'exit', 'discover_entities']
     command_completer = WordCompleter(commands, ignore_case=True)
     session = PromptSession(completer=command_completer)
 
@@ -106,12 +106,18 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
             except Exception as e:
                 click.echo(f"An unexpected error occurred during meta-analysis: {str(e)}")
         elif command == 'discover_entities':
-            ppe = PreprocessorEngine()
-            text = session.prompt("Enter the text to discover entities: ")
-            entities = ppe.discover_entities(text)
-            click.echo("Discovered entities:")
-            for entity in entities:
-                click.echo(entity)
+            try:
+                transcript_index = int(session.prompt("Enter the index number of the transcript file: "))
+                transcript_data = plm.get_interview_data(project_name, transcript_index)
+                if not transcript_data:
+                    click.echo("No transcript found at the specified index.")
+                    continue
+                entities = ppe.discover_entities(transcript_data['content'])
+                click.echo("Discovered entities:")
+                for entity in entities:
+                    click.echo(entity)
+            except ValueError:
+                click.echo("Invalid index number. Please enter a valid integer.")
         else:
             click.echo("Unknown command. Type 'help' for available commands.")
 
