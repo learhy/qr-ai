@@ -23,8 +23,10 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
 
         if command == 'exit':
             break
-        elif command == 'help':
+        elif command == 'help' or command == '?':
             click.echo("Available commands: " + ", ".join(commands))
+        elif command == '':
+            continue
         elif command == 'set_learning_goal':
             print("Enter learning goal (Markdown supported). Press Ctrl+D (Unix) or Ctrl+Z (Windows) followed by Enter to finish:")
             goal_lines = []

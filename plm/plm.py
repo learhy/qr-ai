@@ -137,8 +137,11 @@ class ProjectLifecycleManager:
             print(f"No valid files found in the project directory: {project_dir}")
             return
 
+        # Sort files by file type (extension)
+        sorted_files = sorted(files, key=lambda x: self._get_file_type(x))
+
         imported_files = self.data_manager.get_imported_files(project_name)
-        files_to_import = [f for f in files if not self._is_file_imported(f, imported_files)]
+        files_to_import = [f for f in sorted_files if not self._is_file_imported(f, imported_files)]
 
         if not files_to_import:
             print("No new files to import.")
