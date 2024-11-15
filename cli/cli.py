@@ -116,8 +116,8 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
                 click.echo("Discovered entities:")
                 for entity in entities:
                     click.echo(entity)
-            except ValueError:
-                click.echo("Invalid index number. Please enter a valid integer.")
+            except ValueError as ve:
+                click.echo(f"Invalid index number: {str(ve)}")
             except Exception as e:
                 click.echo(f"An error occurred: {str(e)}")
         else:
