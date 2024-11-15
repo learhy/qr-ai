@@ -4,3 +4,4 @@ __pycache__/
 .DS_Store
 qr-ai.conf
 reporting_engine/__pycache__/engine.cpython-311.pyc
+.env
