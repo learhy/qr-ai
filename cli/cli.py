@@ -107,19 +107,33 @@ def interactive_cli(plm, ppe, ae, project_name, project_config):
                 click.echo(f"An unexpected error occurred during meta-analysis: {str(e)}")
         elif command == 'discover_entities':
             try:
+                plm.status(project_name)
                 transcript_index = int(session.prompt("Enter the index number of the transcript file: "))
-                transcript_data = plm.get_interview_data(project_name, interview_index=transcript_index)
-                if not transcript_data:
-                    click.echo("No transcript found at the specified index.")
-                    continue
-                entities = ppe.discover_entities(transcript_data['content'])
-                click.echo("Discovered entities:")
-                for entity in entities:
-                    click.echo(entity)
-            except ValueError as ve:
-                click.echo(f"Invalid index number: {str(ve)}")
-            except IndexError as ie:
-                click.echo(f"Index out of range: {str(ie)}")
+                
+                # Get the transcript data
+                transcript_data = plm.get_interview_data(project_name, interview_index=transcript_index)[0]
+                
+                # Use processed_vtt_content as the content
+                content = transcript_data['processed_vtt_content']
+                
+                click.echo(f"Content length: {len(content)}")
+                
+                # Discover and display entities
+                entities = ppe.discover_entities(content)
+                
+                # Pretty print the entities
+                click.echo("\nDiscovered Entities:")
+                for category, entity_list in entities.items():
+                    if entity_list:  # Only print categories with entities
+                        click.echo(f"\n{category} Entities:")
+                        for entity in entity_list:
+                            click.echo(f"  - {entity}")
+                
+                # Summary statistics
+                click.echo("\nEntity Count Summary:")
+                for category, entity_list in entities.items():
+                    click.echo(f"{category}: {len(entity_list)} unique entities")
+
             except Exception as e:
                 click.echo(f"An error occurred: {str(e)}")
         else:
